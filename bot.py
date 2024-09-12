@@ -15,19 +15,11 @@ import icalendar, ics
 from ics import Calendar
 import requests
 import datetime
-import time # This is important, because the geocoding API has a rate limit of 1 per second, and we might need to get more than one in a batch.
+import folium # Probably for map stuffs
 
 # A quick not on DB Stuff: The replit DB - for now, this is the easy solution I'm using, but it probably scales terribly. Maybe in the future I'll use an external DB.
 
 client = discord.Client(intents=discord.Intents.default())
-
-# Boolean toggles for bot features. --> In the future to avoid toggling on/off accidentally due to simultaneous use (which may or may not be a problem, but it's not good pracice), may have to add these toggles to the db for each user.
-add_calendar = False
-remove_calendar = False
-add_loc = False
-remove_loc = False
-name_calendar = False
-delete_for_sure = False
 
 @client.event
 async def on_ready():
@@ -68,8 +60,6 @@ async def on_message(message):
     # Prevent Loop
     if message.author == client.user: # Prevents a loop due to the bot sending a message to itself
         return
-
-
 
 
     # Help/Get Started
