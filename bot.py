@@ -3,13 +3,13 @@
 # Imports
 # Discord, Replit DB, keep_alive, and other "key" bot operations
 # from typing import ParamSpecArgs, TypeVarTuple
+db={}
 import discord, os
-from replit import db
+# from replit import db
 from keep_alive import keep_alive
 from discord.ext import tasks
 
-for i in db.keys():
-    del db[i]
+
 # APIs and other libraries to interact with data:
 import icalendar, ics
 from ics import Calendar
@@ -39,9 +39,9 @@ async def on_message(message):
     # Create new users
     if str(channel_id) not in list(db.keys()):
         print("New user found!" + str(channel_id))
-        if message.author is not client.user:
+        if message.author != client.user:
             await message.channel.send("Welcome, " + str(message.author) + "!")
-        db[channel_id] = {"User": channel_user, "Mode" : True, "Daily Report": True, "Primary Location" : "All", "Locations": {} , "Calendars": {}, "Toggles": {"add_calendar":False,"remove_calendar":False,
+        db[str(channel_id)] = {"User": channel_user, "Mode" : True, "Daily Report": True, "Primary Location" : "All", "Locations": {} , "Calendars": {}, "Toggles": {"add_calendar":False,"remove_calendar":False,
 "add_loc" : False, "remove_loc": False, "name_calendar": False, "delete_for_sure": False, "change_primary_loc": False}} # Create a new key for the channel in the db. (Mode here can be simplified or comprehensive, which determines how much information is given to the user. Simplified = True, Comprehensive = False))
 
 
@@ -317,5 +317,6 @@ def get_coords(location):
 
 # SUPER IMPORTANT:
 
-# keep_alive()
-client.run(os.environ['TOKEN'])
+with open('Alerts-Bot/secrets.txt', 'r') as file:
+    TOKEN = eval(file.read())["TOKEN"]
+client.run(TOKEN)
