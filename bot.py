@@ -235,18 +235,13 @@ async def on_message(message):
 
 
 # Weather alerts!
-@tasks.loop(seconds=5)
+@tasks.loop(minutes=15)
 async def check_weather(): # An idea I have for this is to go into the DB, find all the locations and collect them in a list, and then use the weather API to mass get alerts, and then send them out if they apply to the user.
-
-    # Get unique weather locations in a set:
-    get_unique_locations = set()
-    for i in db.keys():
-        for j in list(db[i]["Locations"].keys()):
-            get_unique_locations.add(j)
+    # Check Primary Locations:
+    
 
     # API Calls:
 
-    # Part 1: Geolocation via Nominatim:
     
 
     
