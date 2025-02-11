@@ -1,12 +1,32 @@
-# Random idea: create a user class or at least look at class architectures with discord.py
+"""
+This is the main bot control loop file with maximum abstraction for code cleanliness.
+"""
+
+
+
+'''
+TODO:
+- Weather Alerts for given areas
+    - Radar data + Maps sent as well
+- Calendar integration with live calendars (links to Outlook, Google Calendar)
+
+
+Hard:
+- News: Pulled from NYT for News Updates (pertain to specific topics)
+- Markets: User stock ticker interests
+
+
+Other:
+- Permanent Deployment
+
+'''
+
+
 
 # Imports
-# Discord, Replit DB, keep_alive, and other "key" bot operations
-# from typing import ParamSpecArgs, TypeVarTuple
-db={}
+# Discord
+db = {} # For now, the database is a dictionary, but I think there are probably better ways to store data.
 import discord, os
-# from replit import db
-from keep_alive import keep_alive
 from discord.ext import tasks
 
 
@@ -17,16 +37,19 @@ import requests
 import datetime
 import folium # Probably for map stuffs
 
-# A quick not on DB Stuff: The replit DB - for now, this is the easy solution I'm using, but it probably scales terribly. Maybe in the future I'll use an external DB.
+# Internal:
+from user import User
+import messages
+
 
 client = discord.Client(intents=discord.Intents.default())
 
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
-    # We want to start our background loops immediately because sometimes we might not get a message to start the loop.
+    # We want to start our background loops immediately because sometimes we might not get a message to start the loop. --> Why?
     check_weather.start()
-    # check_time.start()
+    # check_time.start() --> Maybe check_calendar is a better name?
 
 @client.event
 async def on_message(message):
@@ -64,10 +87,7 @@ async def on_message(message):
 
     # Help/Get Started
     if message.content.startswith('!help'):
-        await message.channel.send('Hello! Here are a few things I can help you with:\n\n- **!view_calendar_list**: View all the current calendars being tracked. \n- **!add_calendar**: Add a calendar either through an iCal link (Google Calendar and Outlook) or an .ics file (call this command for more information) \n- **!remove_calendar**: remove a calendar being tracked. \n- **!view_locations**: View a list of tracked locations for weather alerts. \n- **!add_location**: Add a location to track weather for. \n- **!remove_location**: Remove a location being tracked.\n- **!change_primary_location**: Your primary location is the main location that you get weather alerts and daily reports for. You can use **!view_weather** to get all weather reports; by default the first location you input is the primary location. \n- **!change_view_mode**: Toggle on/off simplified and comprehensive data viewing mode. \n- **!change_daily_report**: Toggle on/off daily weather report (default is on). \n- **!view_weather**: View the current weather for all locations.\n- **!feedback**: Give us your feedback! \n- **!delete_data**: Delete all your data in the DB. You will have to start fresh if you so choose.')
-
-
-
+        await message.channel.send(messages.help())
 
     # View Calendars
     if message.content.startswith('!view_calendar_list'):
@@ -136,7 +156,7 @@ async def on_message(message):
 
     elif add_loc: # Check if the location is valid using the Nominatim API, and if not, return an error message
         if get_coords(message.content)[0]:
-            pass
+            await message.channel.send("Your location now added is "+ )
         else:
             await message.channel.send("That is not a valid location. Please try again.")
         add_loc = False
@@ -300,10 +320,10 @@ def get_weather(channel_id, location, view_type): # Takes in a list of location 
 
 # Use the Nominatim API to get the coords for a location: Returns the first search result, and the user would have to play around with things.
 def get_coords(location):
-    search_str = '+'.join(location.replaceAll(',', ' ').split())
-    loc_api_return = requests.get("https://nominatim.openstreetmap.org/search?q="+search_str+"&format=json").json()
+    search_str = '+'.join(location.replace(',', ' ').split())
+    loc_api_return = requests.get("https://nominatim.openstreetmap.org/search?q="+search_str+"&format=json", headers={"User-Agent":"Alerts-Discord-Bot"}).json()
     try:
-        lat, long = loc_api_return[0]["lat"], loc_api_return[0]["lon"]
+        lat, long, name = loc_api_return[0]["lat"], loc_api_return[0]["lon"], loc_api_return[0]['display_name']
         it_worked = True
     except:
         it_worked = False
